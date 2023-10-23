@@ -16,9 +16,11 @@ void * reader(void * arg)
 		sem_wait(&w);
 	}
 	sem_post(&r);
+	
 	printf("\nReader is reading!!");
 	printf("\nThread ID:%ld",pthread_self());
-	sem_wait(&r);sem_post(&r);
+	
+	sem_wait(&r);
 	rdcnt--;
 	if(rdcnt==0)
 	{
@@ -43,11 +45,11 @@ int main()
 	
 	for(int i=0;i<5;i++)
 	{
-		pthread_create(&wrt[i],NULL,reader,NULL);
+		pthread_create(&wrt[i],NULL,writer,NULL);
 	}
 	for(int i=0;i<5;i++)
 	{
-		pthread_create(&rd[i],NULL,writer,NULL);
+		pthread_create(&rd[i],NULL,reader,NULL);
 	}
 	for(int i=0;i<5;i++)
 	{
