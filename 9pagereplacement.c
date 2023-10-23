@@ -136,15 +136,17 @@ void Optimal(int pages[], int frameSize, int n) {
 int main() {
     int pages[20];
     int n;
+    int frameSize;
     printf("Enter the size of the reference string: ");
     scanf("%d", &n);
+    printf("Enter the framesize: ");
+    scanf("%d", &frameSize);
     printf("Enter the reference string:\n");
     for (int i = 0; i < n; ++i) {
         scanf("%d", &pages[i]);
     }
 
-    int frameSize = 3;
-
+    
     FCFS(pages, frameSize, n);
     LRU(pages, frameSize, n);
     Optimal(pages, frameSize, n);
