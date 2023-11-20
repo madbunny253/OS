@@ -11,11 +11,13 @@ void * producer(void* arg)
 	int v;
 	sem_wait(&e);
 	sem_wait(&s);
+	
 	printf("\nEnter Value:");
 	scanf("%d",&v);
 	buff[in]=v;
 	printf("Producer is Producing:%d",v);
 	in=(in+1)%5;
+	
 	sem_post(&s);
 	sem_post(&f);
 }
