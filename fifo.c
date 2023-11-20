@@ -1,92 +1,97 @@
 //1
-#include<stdio.h>
-#include<string.h>
-#include<fcntl.h>
-#include<sys/types.h>
-#include<unistd.h>
-#include<sys/stat.h>
-#include<stdlib.h>
-
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 int main()
 {
-	int fd1,fd2;
-	char * fifo1="fifo1";
-	char * fifo2="fifo2";
-	mkfifo(fifo1,0666);
-	mkfifo(fifo2,0666);
-	while(1)
-	{
-		FILE * fp;
-		fd1=open(fifo1,O_WRONLY);
-		fp=fdopen(fd1,"w");
-		char sent[100];
-		printf("Enter Sentence:");
-		fgets(sent,sizeof(sent),stdin);
-		fprintf(fp,"%s",sent);
-		fclose(fp);
-		
-		fd2=open(fifo2,O_RDONLY);
-		fp=fdopen(fd2,"r");
-		char cont[100];
-		fgets(cont,sizeof(cont),fp);
-		printf("%s",cont);
-		fclose(fp);
-		return 0;
-	}
-}	
+    int fd;
+    char *myfifo = "/tmp/myfifo";
+    // Create the named pipe (FIFO)
+    mkfifo(myfifo, 0666);
+    char sentence[80];
+    while (1)
+    {
+        // Open FIFO for writing
+        fd = open(myfifo, O_WRONLY);
+        // Take input sentence from the user
+        printf("Enter a sentence: ");
+        fgets(sentence, 80, stdin);
+        // Write the sentence to the FIFO
+        write(fd, sentence, strlen(sentence) + 1);
+        close(fd);
+        // Open FIFO for reading
+        fd = open(myfifo, O_RDONLY);
+        // Read and print the processed data
+        char processed_data[256];
+        read(fd, processed_data, sizeof(processed_data));
+        printf("Processed data: %s\n", processed_data);
+        close(fd);
+    }
+    return 0;
+}
 
 //2
-#include<stdio.h>
-#include<string.h>
-#include<sys/types.h>
-#include<sys/stat.h>
-#include<fcntl.h>
-#include<unistd.h>
-#include<stdlib.h>
-
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 int main()
 {
-	int fd1,fd2;
-	char * fifo1="fifo1";
-	char * fifo2="fifo2";
-	mkfifo(fifo1,0777);
-	mkfifo(fifo2,0777);
-	while(1)
-	{
-		FILE * fp;
-		fd1=open(fifo1,O_RDONLY);
-		fp=fdopen(fd1,"r");
-		char sent[100];
-		fgets(sent,sizeof(sent),fp);
-		fclose(fp);
-		
-		int cc=0,wc=0,lc=0;
-		for(int i=0;sent[i] != '\0';i++)
-		{
-			cc++;
-			if(sent[i]==' ' || sent[i]=='\t' || sent[i]=='\n')
-			{
-				wc++;
-			}
-			if(sent[i]=='\n')
-			{
-				lc++;
-			}
-		}
-		
-		FILE * output=fopen("output.txt","w");
-		fprintf(output,"Characters:%d \nWord:%d \nLines:%d\n",cc,wc,lc);
-		fclose(fp);
-		
-		fd2=open(fifo2,O_WRONLY);
-		fp=fdopen(fd2,"w");
-		
-		output=fopen("output.txt","r");
-		char cont[100];
-		fgets(cont,sizeof(cont),output);
-		fprintf(fp,"%s",cont);
-		fclose(fp);
-		fclose(output);
-	}
-	return 0;
+    int fd;
+    char *myfifo = "/tmp/myfifo";
+    // Create the named pipe (FIFO)
+    mkfifo(myfifo, 0666);
+    while (1)
+    {
+        // Open FIFO for reading
+        fd = open(myfifo, O_RDONLY);
+        // Read the sentence from the FIFO
+        char sentence[80];
+        read(fd, sentence, sizeof(sentence));
+
+        read(fd, sentence, 80);
+        // Print the read string and close
+        printf("User1: %s\n", sentence);
+        close(fd);
+        // Process the data (count characters, words, and lines)
+        int char_count = 0, word_count = 0, line_count = 0;
+        for (int i = 0; sentence[i] != '\0'; i++)
+        {
+            if(sentence[i] == '\n')
+            {
+                line_count++;
+            }
+            else if(sentence[i] == ' ')
+            {
+                word_count++;
+            }
+            else
+            {
+                char_count++;
+            }
+
+        }
+        word_count++; // Count the last word
+        // Create a string with the counting results
+        char counting_result[256];
+        snprintf(counting_result, sizeof(counting_result), "Characters: %d, Words: %d, Lines:%d", char_count, word_count, line_count);
+        // Write the counting results to a file
+        FILE *output_file = fopen("output.txt", "w");
+        if (output_file)
+        {
+        fprintf(output_file, "%s\n", counting_result);
+        fclose(output_file);
+        }
+        // Open FIFO for writing
+        fd = open(myfifo, O_WRONLY);
+        // Send the counting results back to Process 1
+        write(fd, counting_result, strlen(counting_result) + 1);
+        close(fd);
+    }
+    return 0;
 }
