@@ -1,72 +1,56 @@
 #!/bin/bash
 
-while true;
+while true
 do
-	echo -e"\n1. Create an addressbook"
-	echo "2. Insert record"
-	echo "3. Display Record"
-	echo "4. Delete record"
-	echo "5. Display record"
-	echo "6. Exit"
-	echo "Choose from above"
+	echo -e "1.Create\n2.Open\n3.Display\n4.Insert\n5.Modify\n6.Delete\n7.Exit"
 	read ch
-	option=1
-	
 	case $ch in
-		1) echo "Enter File Name"
-		   read fname
-		   touch $fname
-		   echo "File Created!"
-		;;
-		
-		2) while [ $option -eq 1 ]
-		   do
-		   
-			   echo "Enter employee id: "
-			   read eid
-			   echo "Enter employee name: "
-			   read ename
-		           echo "Enter employee phone no.: "
-			   read eph
-			   echo "Enter employee city: "
-			   read ecity
-				
-			   echo "$eid $ename $eph $ecity" >> $fname
-			   echo "Do you wanna continue? (1-Yes/2-No)"
-			   read option
-		   
-		   done
-		;;
-		
-		3) cat $fname
-		;;
-		
-		4) echo "Enter the name you want to delete:"
-		   read ename
-		   grep -v $ename $fname >>t$fname
-		   rm $fname
-		   mv t$fname $fname
-		   echo "Name Deleted"
-		   cat $fname
-		;;
-		
-		5) echo "Enter employee name to modify"
-		   read ename
-		   
-		   if grep -v "$ename $fname" ;
-		   then 
-		   echo "Enter New Name:"
-		   read nname
-		   sed -i s/$ename/$nname/g "$fname"
-		   echo "Record modified successfully :)"
-		   
-		   else
-		   echo "Record not found :("
-		   fi
-		;;
-		
-		6) exit
-		;;
-		
+		1)
+			echo "Enter"
+			read fname
+			touch $fname
+			echo -e "\n$fname created"
+			;;
+		2)
+			fname="f.txt"
+			echo -e "\n$fname OPENED"
+			;;
+		3)	
+			cat $fname
+			;;
+		4)	
+			cont=1
+			while [ $cont -eq 1 ]
+			do			
+				echo "ENter ID:"
+				read id
+				echo "ENter name:"
+				read name
+				echo "ENter city:"
+				read city
+				echo -e "$id\t$name\t$city" >> $fname
+				echo "1.Cont	2.Not COn"
+				read cont
+			done
+			;;
+		5)
+			echo "enter to modify"
+			read oldname
+			echo "enter new"
+			read newname
+			sed -i s/$oldname/$newname/g $fname
+			;;
+		6)	
+			echo "enter to delet"
+			read delname
+			grep -v $delname $fname >> temp.txt
+			rm $fname
+			mv temp.txt $fname
+			;;
+		7)
+			exit
+			;;
+		*)
+			echo "Invalid"
 	esac
 done
