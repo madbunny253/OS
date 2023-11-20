@@ -2,10 +2,14 @@
 #include <stdlib.h>
 
 void printFrames(int frames[], int frameSize) {
-    for (int i = 0; i < frameSize; ++i) {
-        if (frames[i] == -1) {
+    for (int i = 0; i < frameSize; ++i) 
+    {
+        if (frames[i] == -1) 
+        {
             printf("X ");
-        } else {
+        } 
+        else 
+        {
             printf("%d ", frames[i]);
         }
     }
@@ -27,21 +31,25 @@ int findLRUIndex(int recent[], int frameSize) {
 void FCFS(int pages[], int frameSize, int n) {
     int frames[frameSize];
     int pageFaults = 0;
-
-    for (int i = 0; i < frameSize; ++i) {
+    for (int i = 0; i < frameSize; ++i) 
+    {
         frames[i] = -1;
     }
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) 
+    {
         int pageExists = 0;
-        for (int j = 0; j < frameSize; ++j) {
-            if (frames[j] == pages[i]) {
+        for (int j = 0; j < frameSize; ++j) 
+        {
+            if (frames[j] == pages[i]) 
+            {
                 pageExists = 1;
                 break;
             }
         }
 
-        if (pageExists == 0) {
+        if (pageExists == 0) 
+        {
             frames[pageFaults % frameSize] = pages[i];
             ++pageFaults;
         }
