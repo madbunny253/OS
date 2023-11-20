@@ -1,109 +1,146 @@
-#include <stdio.h>
-#include <stdbool.h>
-
-struct Process 
+//rr
+#include<stdio.h>
+#include<stdlib.h>
+#include<limits.h>
+struct Process
 {
-    int id;           // Process ID
-    int arrival_time; // Arrival time
-    int burst_time;   // Burst time
-    int remaining_time; // Remaining burst time for preemption
+	int id;
+	int at;
+	int st;
+	int wt;
+	int tat;
+	int rt;
 };
 
-void SJF(struct Process processes[], int n) 
+void rr(struct Process pro[],int n,int quantum)
 {
-    int current_time = 0;
-    int completed = 0;
-    bool visited[n];
-
-    for (int i = 0; i < n; i++) 
+	int current=0;
+	int completed=0;
+	while(completed<n)
 	{
-        visited[i] = false;
-    }
-
-    printf("Order of execution for SJF (Preemptive):\n");
-
-    while (completed < n) {
-        int shortest_job_index = -1;
-        int shortest_job_burst = 999999;
-
-        for (int i = 0; i < n; i++) 
+		for(int i=0;i<n;i++)
 		{
-            if (!visited[i] && processes[i].arrival_time <= current_time &&
-                processes[i].burst_time < shortest_job_burst) {
-                shortest_job_index = i;
-                shortest_job_burst = processes[i].burst_time;
-            }
-        }
-
-        if (shortest_job_index != -1) 
-		{
-            printf("P%d ", processes[shortest_job_index].id);
-            visited[shortest_job_index] = true;
-            completed++;
-            current_time += processes[shortest_job_index].burst_time;
-        } 
-		else 
-		{
-            current_time++;
-        }
-    }
-    printf("\n");
-}
-
-void RR(struct Process processes[], int n, int time_quantum) 
-{
-    int current_time = 0;
-    int completed = 0;
-
-    printf("Order of execution for Round Robin:\n");
-
-    while (completed < n) 
-	{
-        for (int i = 0; i < n; i++) 
-		{
-            if (processes[i].arrival_time <= current_time && processes[i].remaining_time > 0) 
+			if(pro[i].at<=current && pro[i].rt>0)
 			{
-                int execute_time = (processes[i].remaining_time < time_quantum) ? processes[i].remaining_time : time_quantum;
-                processes[i].remaining_time -= execute_time;
-                current_time += execute_time;
-                printf("P%d ", processes[i].id);
-
-                if (processes[i].remaining_time == 0) 
+				if(pro[i].rt<=quantum)
 				{
-                    completed++;
-                }
-            }
-        }
-    }
-
-    printf("\n");
+					current+=pro[i].rt;
+					pro[i].rt=0;
+					completed++;
+				}
+				else
+				{
+					current+=quantum;
+					pro[i].rt-=quantum;
+				}
+				pro[i].tat=current-pro[i].at;
+				pro[i].wt=pro[i].tat-pro[i].st;
+				if (pro[i].wt < 0) 
+				{
+                    			pro[i].wt = 0;
+				}
+			}
+		}
+	}
 }
 
-int main() {
-    int n, time_quantum;
-    printf("Enter the number of processes: ");
-    scanf("%d", &n);
-
-    struct Process processes[n];
-
-    for (int i = 0; i < n; i++) 
+int main()
+{
+	int n,quantum;
+	printf("Enter Number of Process:");
+	scanf("%d",&n);
+	printf("Enter the time quantum: ");
+    	scanf("%d", &quantum);
+	
+	struct Process pro[n];
+	for(int i=0;i<n;i++)
 	{
-        processes[i].id = i + 1;
-        printf("Enter arrival time for P%d: ", i + 1);
-        scanf("%d", &processes[i].arrival_time);
-        printf("Enter burst time for P%d: ", i + 1);
-        scanf("%d", &processes[i].burst_time);
-        processes[i].remaining_time = processes[i].burst_time;
-    }
+		pro[i].id=i+1;
+		printf("Enter Arrival Time for%d",i+1);
+		scanf("%d",&pro[i].at);
+		printf("Enter Service Time for%d",i+1);
+		scanf("%d",&pro[i].st);
+		pro[i].rt=pro[i].st;
+	}
+	
+	rr(pro,n,quantum);
+	printf("Process\tArrival TIme\tService Time\tWaiting Time\tTurn Around Time\n");
+	for(int i=0;i<n;i++)
+	{
+		printf("%d\t%d\t\t%d\t\t%d\t\t%d\n",pro[i].id,pro[i].at,pro[i].st,pro[i].wt,pro[i].tat);
+	}
+}
 
-    printf("Enter time quantum for Round Robin: ");
-    scanf("%d", &time_quantum);
+//sjf
+#include<stdio.h>
+#include<stdlib.h>
+#include<limits.h>
+struct Process
+{
+	int id;
+	int at;
+	int st;
+	int wt;
+	int tat;
+	int rt;
+};
 
-    printf("Order of execution for SJF (Preemptive):\n");
-    SJF(processes, n);
-    
-    printf("Order of execution for Round Robin:\n");
-    RR(processes, n, time_quantum);
+void sjf(struct Process pro[],int n)
+{
+	int current=0;
+	int completed=0;
+	int shortest;
+	while(completed<n)
+	{
+		shortest=-1;
+		int minsert=INT_MAX;
+		for(int i=0;i<n;i++)
+		{
+			if(pro[i].at<=current && pro[i].rt>0 && pro[i].st<minsert)
+			{
+				shortest=i;
+				minsert=pro[i].st;
+			}
+		}
+		if(shortest==-1)
+		{
+			current++;
+		}
+		else
+		{
+			pro[shortest].rt--;
+			current++;
+			if(pro[shortest].rt==0)
+			{
+				completed++;
+				pro[shortest].tat=current-pro[shortest].at;
+				pro[shortest].wt=pro[shortest].tat-pro[shortest].st;
+			}
+		}
+	}
+}
 
-    return 0;
+int main()
+{
+	int n;
+	printf("Enter Number of Process:");
+	scanf("%d",&n);
+	
+	struct Process pro[n];
+	for(int i=0;i<n;i++)
+	{
+		pro[i].id=i+1;
+		printf("Enter Arrival Time for%d",i+1);
+		scanf("%d",&pro[i].at);
+		printf("Enter Service Time for%d",i+1);
+		scanf("%d",&pro[i].st);
+		pro[i].rt=pro[i].st;
+	}
+	
+	sjf(pro,n);
+	printf("Process\tArrival TIme\tService Time\tWaiting Time\tTurn Around Time\n");
+	for(int i=0;i<n;i++)
+	{
+		printf("%d\t%d\t\t%d\t\t%d\t\t%d\n",pro[i].id,pro[i].at,pro[i].st,pro[i].wt,pro[i].tat);
+	}
 }
